@@ -5,4 +5,4 @@ FROM
         INNER JOIN
     CUSTOMERS ON ORDERS.customer_id = CUSTOMERS.id
 WHERE
-    CUSTOMERS.name = ?;
+    CUSTOMERS.name = :first_name;

@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class GetProductNameController {
     private final GetProductNameRepository repository;
@@ -14,7 +16,7 @@ public class GetProductNameController {
     }
 
     @GetMapping("/products/fetch-product")
-    public String getProductName(@RequestParam("name") String name) {
+    public List<String> getProductName(@RequestParam("name") String name) {
         return repository.getProductName(name);
     }
 

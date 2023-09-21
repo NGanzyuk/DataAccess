@@ -1,22 +1,26 @@
 
 package homework3.dataaccess.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-@org.springframework.stereotype.Repository
-public class GetProductNameRepository {
-    String script = read("src/main/resources/Select.sql");
+@Repository
+public class GetProductNameRepository implements GetProductNameInterface{
+
+    @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final String script = read("src/main/resources/Select.sql");
 
     private static String read(String scriptFileName) {
         try (InputStream is = new ClassPathResource(scriptFileName).getInputStream();
@@ -26,13 +30,15 @@ public class GetProductNameRepository {
             throw new RuntimeException(e);
         }
     }
-    public void setDataSource(DataSource dataSource) {
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
 
-    public String getProductName(String name) {
-        SqlParameterSource namedParameters = new MapSqlParameterSource("name", name);
-        return this.namedParameterJdbcTemplate.queryForObject(script, namedParameters, String.class);
+    public List<String> getProductName(String name) {
+        ConcurrentMap<String, Object> params = new ConcurrentHashMap<>();
+        params.put("firstName", name);
+        return namedParameterJdbcTemplate.query(script, params,
+                (rs, rowNum) -> {
+                    String productName = rs.getString("product_name");
+                    return productName;
+                });
     }
 
 }

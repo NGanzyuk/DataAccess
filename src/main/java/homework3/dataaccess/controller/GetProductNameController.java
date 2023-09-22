@@ -20,4 +20,8 @@ public class GetProductNameController {
         return repository.getProductName(name);
     }
 
+    @GetMapping("/products/fetch")
+    public String emptyMethod() {
+        return "Hello";
+    }
 }

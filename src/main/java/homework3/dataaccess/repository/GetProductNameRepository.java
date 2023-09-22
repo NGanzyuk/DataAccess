@@ -10,17 +10,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
-public class GetProductNameRepository implements GetProductNameInterface{
+public class GetProductNameRepository implements GetProductNameInterface {
 
-    @Autowired
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final String script = read("src/main/resources/Select.sql");
+
+    public GetProductNameRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
 
     private static String read(String scriptFileName) {
         try (InputStream is = new ClassPathResource(scriptFileName).getInputStream();
@@ -32,13 +35,9 @@ public class GetProductNameRepository implements GetProductNameInterface{
     }
 
     public List<String> getProductName(String name) {
-        ConcurrentMap<String, Object> params = new ConcurrentHashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("firstName", name);
-        return namedParameterJdbcTemplate.query(script, params,
-                (rs, rowNum) -> {
-                    String productName = rs.getString("product_name");
-                    return productName;
-                });
+        return namedParameterJdbcTemplate.queryForList(script, params, String.class);
     }
 
 }
